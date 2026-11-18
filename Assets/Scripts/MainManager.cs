@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityEngine.InputSystem; // MIGRATED: New Input System namespace
+using UnityEngine.InputSystem;
+using TMPro;
+using System.IO; // MIGRATED: New Input System namespace
 
 public class MainManager : MonoBehaviour
 {
@@ -12,7 +14,11 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text BestScoreText;
     public GameObject GameOverText;
+
+    const string FileName = "savefile.json";
+
 
     private bool m_Started = false;
     private int m_Points;
@@ -26,6 +32,7 @@ public class MainManager : MonoBehaviour
     void Awake()
     {
         m_LaunchAction = new InputAction("Launch", InputActionType.Button, "<Keyboard>/space");
+        LoadPlayer();
     }
 
     // MIGRATED: enable the action while the component is active
@@ -57,6 +64,11 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
+        if(MenuMainManager.Instance != null)
+        {
+            //AddPlayerName();
+        }
     }
 
     private void Update()
@@ -83,6 +95,38 @@ public class MainManager : MonoBehaviour
         }
     }
 
+    void AddPlayerName()
+    {
+        BestScoreText.text = "Best Score: " + MenuMainManager.Instance.PlayerName.text.ToString();
+    }    
+    
+    public void SavePlayer()
+    {        
+        SaveData data = new SaveData();
+        data.PlayerName = MenuMainManager.Instance.PlayerName.text;
+        data.Score = m_Points;
+
+        string json = JsonUtility.ToJson(data);        
+
+        File.WriteAllText(Application.persistentDataPath + "/" + FileName, json);
+    }
+
+    public void LoadPlayer()
+    {
+        string path = Application.persistentDataPath + "/" + FileName;
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            SaveData data = JsonUtility.FromJson<SaveData>(json);
+
+            BestScoreText.text = $"Best Score: {data.PlayerName}: {data.Score}";
+        }
+        else
+        {
+            BestScoreText.text = "Best Score:";
+        }
+    }
+
     void AddPoint(int point)
     {
         m_Points += point;
@@ -93,5 +137,6 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        SavePlayer();
     }
 }
