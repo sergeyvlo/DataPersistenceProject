@@ -1569,7 +1569,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed0e2bc5cd2836f76bd51d54d36c8816, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MenuMainManager
-  PlayerName: {fileID: 1917112179}
+  PlayerName: 
+  InputName: {fileID: 104275866}
   BestScoreText: {fileID: 1241546231}
 --- !u!4 &1896252388
 Transform:
@@ -1838,6 +1839,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccba46ffffcf2a26d8a879cf33cb0bdb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MenuUIHandler
+  InputName: {fileID: 104275866}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

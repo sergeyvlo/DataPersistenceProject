@@ -1,11 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
-using TMPro;
-using System.IO; // MIGRATED: New Input System namespace
+using SaveDataGame;
 
 public class MainManager : MonoBehaviour
 {
@@ -16,10 +13,7 @@ public class MainManager : MonoBehaviour
     public Text ScoreText;
     public Text BestScoreText;
     public GameObject GameOverText;
-
-    const string FileName = "savefile.json";
-
-
+   
     private bool m_Started = false;
     private int m_Points;
 
@@ -27,24 +21,29 @@ public class MainManager : MonoBehaviour
 
     // MIGRATED: InputAction replaces Input.GetKeyDown(KeyCode.Space)
     private InputAction m_LaunchAction;
+    private InputAction m_LaunchMenu;
+
+    private SaveData bestPlayer = new SaveData();
 
     // MIGRATED: bind the Space key as a button action
     void Awake()
     {
-        m_LaunchAction = new InputAction("Launch", InputActionType.Button, "<Keyboard>/space");
-        LoadPlayer();
+        m_LaunchAction = new InputAction("Launch", InputActionType.Button, "<Keyboard>/space");               
+        m_LaunchMenu = new InputAction("Launch", InputActionType.Button, "<Keyboard>/m");               
     }
 
     // MIGRATED: enable the action while the component is active
     void OnEnable()
     {
         m_LaunchAction.Enable();
+        m_LaunchMenu.Enable();
     }
 
     // MIGRATED: disable the action when the component is inactive
     void OnDisable()
     {
         m_LaunchAction.Disable();
+        m_LaunchMenu.Disable();
     }
 
     // Start is called before the first frame update
@@ -63,11 +62,15 @@ public class MainManager : MonoBehaviour
                 brick.PointValue = pointCountArray[i];
                 brick.onDestroyed.AddListener(AddPoint);
             }
-        }
+        }        
 
         if(MenuMainManager.Instance != null)
         {
-            //AddPlayerName();
+            SaveData player = LoadBestPlayer();
+            if (player != null)
+            {
+                bestPlayer = player;
+            }             
         }
     }
 
@@ -92,39 +95,39 @@ public class MainManager : MonoBehaviour
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
+
+            if (m_LaunchMenu.WasPerformedThisFrame())
+            {
+                SceneManager.LoadScene(0);               
+            }
         }
     }
 
-    void AddPlayerName()
-    {
-        BestScoreText.text = "Best Score: " + MenuMainManager.Instance.PlayerName.text.ToString();
-    }    
-    
     public void SavePlayer()
     {        
-        SaveData data = new SaveData();
-        data.PlayerName = MenuMainManager.Instance.PlayerName.text;
-        data.Score = m_Points;
-
-        string json = JsonUtility.ToJson(data);        
-
-        File.WriteAllText(Application.persistentDataPath + "/" + FileName, json);
+        if (bestPlayer.Score < m_Points)
+        {
+            SaveData data = new SaveData();
+            data.PlayerName = MenuMainManager.Instance.PlayerName;
+            data.Score = m_Points;
+                       
+            MenuMainManager.Instance.SaveGameData(data);
+        }
     }
 
-    public void LoadPlayer()
+    public SaveData LoadBestPlayer()
     {
-        string path = Application.persistentDataPath + "/" + FileName;
-        if (File.Exists(path))
+        SaveData data = MenuMainManager.Instance.LoadGameData();
+        if (data != null)
         {
-            string json = File.ReadAllText(path);
-            SaveData data = JsonUtility.FromJson<SaveData>(json);
-
             BestScoreText.text = $"Best Score: {data.PlayerName}: {data.Score}";
         }
         else
         {
-            BestScoreText.text = "Best Score:";
+            BestScoreText.text = "Best Score: : 0";
         }
+
+        return data;
     }
 
     void AddPoint(int point)
@@ -135,8 +138,9 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
-        m_GameOver = true;
-        GameOverText.SetActive(true);
         SavePlayer();
+        LoadBestPlayer();
+        m_GameOver = true;
+        GameOverText.SetActive(true);        
     }
 }

@@ -1,9 +1,10 @@
-using System;
-
-[System.Serializable]
-class SaveData
-{    
-    public string PlayerName;
-    public int Score;
+namespace SaveDataGame
+{
+    [System.Serializable]
+    public class SaveData
+    {
+        public string PlayerName = "";
+        public int Score = 0;
+    }
 }
-    
+ 
