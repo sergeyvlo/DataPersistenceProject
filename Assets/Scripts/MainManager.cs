@@ -97,7 +97,7 @@ public class MainManager : MonoBehaviour
             }
 
             if (m_LaunchMenu.WasPerformedThisFrame())
-            {
+            {                
                 SceneManager.LoadScene(0);               
             }
         }
@@ -111,13 +111,13 @@ public class MainManager : MonoBehaviour
             data.PlayerName = MenuMainManager.Instance.PlayerName;
             data.Score = m_Points;
                        
-            MenuMainManager.Instance.SaveGameData(data);
+            SaveDataJson.SaveGameData(data);
         }
     }
 
     public SaveData LoadBestPlayer()
     {
-        SaveData data = MenuMainManager.Instance.LoadGameData();
+        SaveData data = SaveDataJson.LoadGameData();
         if (data != null)
         {
             BestScoreText.text = $"Best Score: {data.PlayerName}: {data.Score}";
